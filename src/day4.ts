@@ -25,7 +25,7 @@ const deltas = [
     {ix: 1, iy: 1},
 ];
 
-function findAllWords(board: string[], location: Coordinate, word: string, delta: Delta): boolean {
+function matchWord(board: string[], location: Coordinate, word: string, delta: Delta): boolean {
     return [...word].every ( (curChar, i) => {
         try {
             return board[location.y + delta.iy * i][location.x + delta.ix * i] === curChar;
@@ -36,9 +36,31 @@ function findAllWords(board: string[], location: Coordinate, word: string, delta
     });
 };
 
+function findAllIndexes(board: string[], symbol: string): Coordinate[] {
+    return board.flatMap((curLine, y) => [...curLine].map((curChar, x) => curChar === symbol ? {y: y, x: x} : undefined).filter(value => value !== undefined))
+}
+
 const word = 'XMAS';
 
-const allCoordinates: Coordinate[] = board.flatMap((curLine, y) => [...curLine].map((curChar, x) => curChar === 'X' ? {y: y, x: x} : undefined).filter(value => value !== undefined))
+const allCoordinates = findAllIndexes(board, 'X')
 
-const res = deltas.flatMap(delta => allCoordinates.filter(coordinate => findAllWords(board, coordinate, word, delta))).length;
+const res = deltas.flatMap(delta => allCoordinates.filter(coordinate => matchWord(board, coordinate, word, delta))).length;
 console.log(res);
+
+
+
+const cutBoard =  board.slice(1, board.length - 1).map(line => line.slice(1, line.length - 1));
+const allCoordinates2 = findAllIndexes(cutBoard, 'A')
+
+
+const matchWords = (board: string[], words: string[], delta: Delta, coordinate: Coordinate) => {
+    return words.some(word => matchWord(board, coordinate, word, delta));
+}
+
+const res2 = allCoordinates2.filter(coordinate => 
+    matchWords(board, ['MAS', 'SAM'], {ix: 1, iy: 1}, coordinate) && matchWords(board, ['MAS', 'SAM'], {ix: -1, iy: 1}, {x: coordinate.x + 2, y: coordinate.y})
+).length;
+
+
+console.log(res2);
+
